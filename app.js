@@ -6,6 +6,10 @@ const frag = document.createDocumentFragment();
 
 let tareas = {}
 document.addEventListener("DOMContentLoaded", ()=>{
+    if (localStorage.getItem('tareas')) {
+        tareas=JSON.parse(localStorage.getItem('tareas'))
+        
+    }
     pintarTareas()
 })
 listaTarea.addEventListener('click', e=>{
@@ -38,12 +42,26 @@ const setTarea = e => {
 }
 
 const pintarTareas = () =>{
-    listaTarea.innerHTML=''
+
+
+    localStorage.setItem('tareas', JSON.stringify(tareas))
+
+    if (Object.values(tareas).length==0) {
+        listaTarea.innerHTML='<div class="alert alert-dark text-center">No hay tareas pendientes </div>'
+        return
+    }
+
+
+
+    listaTarea.innerHTML=''    
     Object.values(tareas).forEach(tarea =>{
         const clone = template.cloneNode(true)
         clone.querySelector("p").textContent = tarea.texto;
         if(tarea.estado){
             //continue here
+            clone.querySelector(".alert-warning").classList.replace('alert-warning','alert-primary')
+            clone.querySelectorAll(".fas")[0].classList.replace('fa-check-circle', "fa-redo")
+            clone.querySelector('p').style.textDecoration = "line-through"
         }
 
         clone.querySelectorAll(".fas")[0].dataset.id= tarea.id;
@@ -55,16 +73,23 @@ const pintarTareas = () =>{
 }
 const btnAccion= (e)=>{
     if(e.target.classList.contains("fa-check-circle")){
-        console.log(e.target.dataset.id);
+       // console.log(e.target.dataset.id);
         tareas[e.target.dataset.id].estado= true;
         pintarTareas()
-        console.log(tareas)
+       
     };
 
     if(e.target.classList.contains("fa-minus-circle")){
         delete  tareas[e.target.dataset.id]
         pintarTareas()
-        console.log()
+        
     }
+
+    if(e.target.classList.contains("fa-redo")){
+        //console.log(e.target.dataset.id);
+        tareas[e.target.dataset.id].estado= false;
+        pintarTareas()
+        
+    };
     e.stopPropagation()
 }
